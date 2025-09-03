@@ -93,6 +93,8 @@ def get_args_parser():
 
     # ---- Dataset & paths
     parser.add_argument("--data_path", default="./data/", type=str)
+    parser.add_argument("--data_mode", default="image_folder", type=str)
+    parser.add_argument("--csv_path", default=None, type=str, help="Path to CSV file (if data_mode is csv)")
     parser.add_argument("--nb_classes", default=8, type=int)
     parser.add_argument("--output_dir", default="./output_dir")
     parser.add_argument("--log_dir", default="./output_logs")

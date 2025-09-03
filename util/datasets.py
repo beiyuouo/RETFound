@@ -4,11 +4,44 @@ from torch.utils.data import Subset
 from torchvision import datasets, transforms
 from timm.data import create_transform
 from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
+from pathlib import Path
+import pandas as pd
+from PIL import Image
+
+class CSVDataset(torch.utils.data.Dataset):
+    def __init__(self, csv_file, transform=None):
+        self.data = pd.read_csv(csv_file)
+        self.transform = transform
+        self.targets = self.data['label'].tolist()
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        item = self.data.iloc[idx]
+        image = Image.open(item['impath'])
+        label = item['label']
+
+        if image.mode == 'L':
+            image = image.convert('RGB')
+
+        if self.transform:
+            image = self.transform(image)
+
+        return image, label
 
 def build_dataset(is_train, args):
     transform = build_transform(is_train, args)
-    root = os.path.join(args.data_path, is_train)
-    dataset = datasets.ImageFolder(root, transform=transform)
+    data_mode = getattr(args, "data_mode", "image_folder")
+
+    if data_mode == "image_folder":
+        root = os.path.join(args.data_path, is_train)
+        dataset = datasets.ImageFolder(root, transform=transform)
+    else:
+        csv_path = getattr(args, "csv_path", None)
+        assert csv_path is not None, "csv_path should be provided for csv data_mode"
+        root = os.path.join(args.data_path, f"{Path(csv_path).stem}_{is_train}.csv")
+        dataset = CSVDataset(root, transform=transform)
 
     if is_train == 'train':
         ratio = float(getattr(args, "dataratio", 1.0))
