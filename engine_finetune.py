@@ -109,15 +109,26 @@ def evaluate(data_loader, model, device, args, epoch, mode, num_class, log_write
         pred_labels.extend(output_label.detach().cpu().numpy())
         pred_softmax.extend(output_.detach().cpu().numpy())
     
-    accuracy = accuracy_score(true_labels, pred_labels)
-    hamming = hamming_loss(true_onehot, pred_onehot)
-    jaccard = jaccard_score(true_onehot, pred_onehot, average='macro')
-    average_precision = average_precision_score(true_onehot, pred_softmax, average='macro')
-    kappa = cohen_kappa_score(true_labels, pred_labels)
-    f1 = f1_score(true_onehot, pred_onehot, zero_division=0, average='macro')
-    roc_auc = roc_auc_score(true_onehot, pred_softmax, multi_class='ovr', average='macro')
-    precision = precision_score(true_onehot, pred_onehot, zero_division=0, average='macro')
-    recall = recall_score(true_onehot, pred_onehot, zero_division=0, average='macro')
+    try:
+        accuracy = accuracy_score(true_labels, pred_labels)
+        hamming = hamming_loss(true_onehot, pred_onehot)
+        jaccard = jaccard_score(true_onehot, pred_onehot, average='macro')
+        average_precision = average_precision_score(true_onehot, pred_softmax, average='macro')
+        kappa = cohen_kappa_score(true_labels, pred_labels)
+        f1 = f1_score(true_onehot, pred_onehot, zero_division=0, average='macro')
+        roc_auc = roc_auc_score(true_onehot, pred_softmax, multi_class='ovr', average='macro')
+        precision = precision_score(true_onehot, pred_onehot, zero_division=0, average='macro')
+        recall = recall_score(true_onehot, pred_onehot, zero_division=0, average='macro')
+    except ValueError:
+        accuracy = 0.0
+        hamming = 0.0
+        jaccard = 0.0
+        average_precision = 0.0
+        kappa = 0.0
+        f1 = 0.0
+        roc_auc = 0.0
+        precision = 0.0
+        recall = 0.0
     
     score = (f1 + roc_auc + kappa) / 3
     if log_writer:
