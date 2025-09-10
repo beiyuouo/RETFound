@@ -21,8 +21,13 @@ class CSVDataset(torch.utils.data.Dataset):
         item = self.data.iloc[idx]
         image = Image.open(item['impath'])
         label = item['label']
-
+        
+        # 1 channel to 3 channel
         if image.mode == 'L':
+            image = image.convert('RGB')
+        
+        # 4 channel to 3 channel
+        if image.mode == 'RGBA':
             image = image.convert('RGB')
 
         if self.transform:
