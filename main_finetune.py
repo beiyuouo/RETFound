@@ -420,6 +420,10 @@ def main(args, criterion):
             with open(os.path.join(args.output_dir, args.task, "log.txt"), "a", encoding="utf-8") as f:
                 f.write(json.dumps(log_stats) + "\n")
 
+    # synchronize ddp
+    if args.distributed:
+        torch.distributed.barrier()
+
     # =========================
     # Final Test (Best Ckpt)
     # =========================
